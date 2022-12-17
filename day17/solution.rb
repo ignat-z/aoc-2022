@@ -75,6 +75,9 @@ def copy_field(field)
   Marshal.load(Marshal.dump(field))
 end
 
+
+$dropped = []
+
 def drop_field(field)
   to_drop = (1...MAX_HEIGHT).find {
     break(nil) if field[_1].all? { |cell| cell == EMPTY }
@@ -99,12 +102,16 @@ should_fall    = true
 t = 0
 dropped = 0
 
+STATES  = []
+DROPS   = []
+STACKED = []
+
 loop do
   if !current_figure
     current_figure = FIGURES.next
     t += 1
 
-    break if t - 1 == P1_LIMIT
+    break if t - 1 == P2_LIMIT
     current_figure = current_figure.map { |(y, x)| [y + current_top + Y_OFFSET, x + X_OFFSET] }
     should_fall = false
   end
@@ -127,10 +134,29 @@ loop do
     draw(field, current_figure)
     current_figure = nil
 
-    dropped += drop_field(field)
+    mfield = Marshal.dump(field)
+    if t > 1 && STATES.include?(mfield)
+      STATES.clear
+
+      while t + 1372 + 1225 < P2_LIMIT
+        t += 890
+        dropped += 1372
+        # p [t, dropped]
+        t += 815
+        dropped += 1225
+        # p [t, dropped]
+      end
+    end
+
+    to_drop = drop_field(field)
+    dropped += to_drop
+
+    STATES << mfield
+    DROPS  << to_drop
+    STACKED << (t - (STACKED.sum || 0))
 
     current_top = (0..MAX_HEIGHT).find { !field[_1].include?(FILLED) }
   end
 end
 
-p dropped + current_top - 1
+part2 = dropped + current_top - 1
