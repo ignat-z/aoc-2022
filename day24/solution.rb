@@ -65,8 +65,11 @@ require 'set'
 
 MEM = {}
 def step(map, blizzards, steps)
+  return blizzards if steps == 0
   return MEM[steps] if MEM[steps]
-  steps.times do
+
+  blizzards = step(map, blizzards, steps - 1)
+  1.times do
     blizzards = blizzards.map { |(x, y, blizzard)|
       nx, ny = nil
       case blizzard
@@ -90,7 +93,7 @@ def step(map, blizzards, steps)
       [nx, ny, blizzard]
     }
   end
-  MEM[steps] = blizzards.map { _1.first(2) }.to_set
+  MEM[steps] = blizzards
 end
 
 def shortest_path(map, blizzards, from, to, t)
@@ -99,7 +102,8 @@ def shortest_path(map, blizzards, from, to, t)
     break if positions.include?(to)
     t += 1
 
-    current_blizzards = step(map, blizzards, t)
+    current_blizzards = step(map, blizzards, t).map { _1.first(2) }.to_set
+
     next_positions = Set.new
     positions.each do |player|
       x,y = player
